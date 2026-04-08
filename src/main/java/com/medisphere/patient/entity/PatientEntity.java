@@ -62,4 +62,7 @@ public class PatientEntity {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @Column(name = "status", length = Integer.MAX_VALUE)
+    private String status;
+
 }

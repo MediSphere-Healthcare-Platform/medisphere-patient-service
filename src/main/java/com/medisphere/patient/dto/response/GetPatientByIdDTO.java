@@ -28,4 +28,5 @@ public class GetPatientByIdDTO {
     private String profileImageUrl;
     private Instant createdAt;
     private Instant updatedAt;
+    private String status;
 }
