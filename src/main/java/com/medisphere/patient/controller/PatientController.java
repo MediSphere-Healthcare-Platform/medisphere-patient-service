@@ -1,5 +1,6 @@
 package com.medisphere.patient.controller;
 
+import com.medisphere.patient.client.DoctorClient;
 import com.medisphere.patient.dto.request.GetPatientByIdReqDTO;
 import com.medisphere.patient.dto.response.GetPatientByIdDTO;
 import com.medisphere.patient.service.PatientService;
@@ -19,6 +20,15 @@ import java.util.List;
 public class PatientController {
 
     private final PatientService patientService;
+    private final DoctorClient doctorClient;
+
+    @GetMapping(value = Endpoint.GET_ALL_DOCTORS_FOR_PATIENT)
+    public ResponseEntity<StandardResponse> getAllDoctorsForPatient() {
+        return new ResponseEntity<>(
+                doctorClient.getAllDoctors(),
+                HttpStatus.OK
+        );
+    }
 
     @GetMapping(value = Endpoint.GET_ALL_PATIENT_FOR_ADMIN)
     public ResponseEntity<StandardResponse> getAllPatientForAdmin() {
