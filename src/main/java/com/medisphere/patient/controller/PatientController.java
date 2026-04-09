@@ -2,6 +2,7 @@ package com.medisphere.patient.controller;
 
 import com.medisphere.patient.client.AppointmentClient;
 import com.medisphere.patient.client.DoctorClient;
+import com.medisphere.patient.dto.request.AppointmentUpdateRequestDTO;
 import com.medisphere.patient.dto.request.BookAppointmentRequestDTO;
 import com.medisphere.patient.dto.request.CreatePatientDTO;
 import com.medisphere.patient.dto.request.GetPatientByIdReqDTO;
@@ -70,9 +71,25 @@ public class PatientController {
     }
 
     @PostMapping(value = Endpoint.BOOK_AN_APPOINTMENT)
-    public ResponseEntity<Object> bookAppointment(@Valid @RequestBody BookAppointmentRequestDTO bookAppointmentRequestDTO) {
+    public ResponseEntity<Object> bookAppointment(@Validated @RequestBody BookAppointmentRequestDTO bookAppointmentRequestDTO) {
         return new ResponseEntity<>(
                 appointmentClient.bookAppointment(bookAppointmentRequestDTO),
+                HttpStatus.OK
+        );
+    }
+
+    @PutMapping(value = Endpoint.UPDATE_APPOINTMENT)
+    public ResponseEntity<Object> updateAppointment(@Validated @RequestBody AppointmentUpdateRequestDTO appointmentUpdateRequestDTO) {
+        return new ResponseEntity<>(
+                appointmentClient.updateAppointment(appointmentUpdateRequestDTO),
+                HttpStatus.OK
+        );
+    }
+
+    @DeleteMapping(value = Endpoint.DELETE_APPOINTMENT)
+    public ResponseEntity<Object> deleteAppointment(@PathVariable("appointmentReferenceId") String appointmentReferenceId) {
+        return new ResponseEntity<>(
+                appointmentClient.cancelAppointment(appointmentReferenceId),
                 HttpStatus.OK
         );
     }
