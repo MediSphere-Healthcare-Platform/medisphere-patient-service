@@ -9,4 +9,7 @@ public interface PatientRepository extends JpaRepository<PatientEntity, Integer>
 
     @Query(value = "SELECT * FROM medisphere_patient WHERE patient_id = :patientId", nativeQuery = true)
     PatientEntity findByPatientId(@Param("patientId") String patientId);
+
+    @Query(value = "SELECT patient_id FROM medisphere_patient ORDER BY id DESC LIMIT 1", nativeQuery = true)
+    String findLastPatientId();
 }
