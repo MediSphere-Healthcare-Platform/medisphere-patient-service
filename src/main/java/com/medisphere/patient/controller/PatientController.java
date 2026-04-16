@@ -166,4 +166,16 @@ public class PatientController {
                 HttpStatus.OK
         );
     }
+
+    // Internal endpoint for service-to-service communication (e.g., from Auth Service)
+    @PostMapping(value = "/createPatient/internal")
+    public ResponseEntity<StandardResponse> createPatientInternal(
+            @Valid @RequestBody CreatePatientDTO createPatientDTO
+    ) {
+        String patientId = patientService.createPatient(createPatientDTO, null);
+        return new ResponseEntity<>(
+                new StandardResponse(201, "Patient created successfully", patientId),
+                HttpStatus.CREATED
+        );
+    }
 }
