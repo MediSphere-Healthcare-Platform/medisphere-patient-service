@@ -5,8 +5,11 @@ import com.medisphere.patient.client.DoctorClient;
 import com.medisphere.patient.dto.request.AppointmentUpdateRequestDTO;
 import com.medisphere.patient.dto.request.BookAppointmentRequestDTO;
 import com.medisphere.patient.dto.request.CreatePatientDTO;
+import com.medisphere.patient.dto.request.DeletePatientDTO;
 import com.medisphere.patient.dto.request.GetPatientByIdReqDTO;
 import com.medisphere.patient.dto.response.GetPatientByIdDTO;
+import com.medisphere.patient.repository.MedicalReportRepository;
+import com.medisphere.patient.service.MedicalReportService;
 import com.medisphere.patient.service.PatientService;
 import com.medisphere.patient.util.Endpoint;
 import com.medisphere.patient.util.StandardResponse;
@@ -28,6 +31,7 @@ public class PatientController {
     private final PatientService patientService;
     private final DoctorClient doctorClient;
     private final AppointmentClient appointmentClient;
+    private final MedicalReportService medicalReportService;
 
     @GetMapping(value = Endpoint.GET_ALL_DOCTORS_FOR_PATIENT)
     public ResponseEntity<StandardResponse> getAllDoctorsForPatient() {
@@ -79,9 +83,19 @@ public class PatientController {
     }
 
     @PutMapping(value = Endpoint.UPDATE_APPOINTMENT)
-    public ResponseEntity<Object> updateAppointment(@Validated @RequestBody AppointmentUpdateRequestDTO appointmentUpdateRequestDTO) {
+    public ResponseEntity<Object> updateAppointment(@Valid @RequestBody AppointmentUpdateRequestDTO appointmentUpdateRequestDTO) {
         return new ResponseEntity<>(
                 appointmentClient.updateAppointment(appointmentUpdateRequestDTO),
+                HttpStatus.OK
+        );
+    }
+
+    @DeleteMapping(value = Endpoint.DELETE_PATIENT)
+    public ResponseEntity<StandardResponse> deletePatient(@Valid @PathVariable("pid") String pid) {
+        DeletePatientDTO deletePatientDTO = new DeletePatientDTO();
+        deletePatientDTO.setPatientId(pid);
+        return new ResponseEntity<>(
+                new StandardResponse(200, "Patient deleted successfully", patientService.deletePatient(deletePatientDTO)),
                 HttpStatus.OK
         );
     }
@@ -90,6 +104,16 @@ public class PatientController {
     public ResponseEntity<Object> deleteAppointment(@PathVariable("appointmentReferenceId") String appointmentReferenceId) {
         return new ResponseEntity<>(
                 appointmentClient.cancelAppointment(appointmentReferenceId),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping(value = Endpoint.GET_PATIENT_REPORTS_BY_ID)
+    public ResponseEntity<StandardResponse> getPatientReportsByPatientId(@Valid @PathVariable("pid") String pid) {
+        GetPatientByIdReqDTO getPatientByIdReqDTO = new GetPatientByIdReqDTO();
+        getPatientByIdReqDTO.setPatientId(pid);
+        return new ResponseEntity<>(
+                new StandardResponse(200, "Patient Reports Successfully fetched..", medicalReportService.getAllMedicalReportByPatientId(getPatientByIdReqDTO)),
                 HttpStatus.OK
         );
     }

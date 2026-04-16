@@ -1,6 +1,7 @@
 package com.medisphere.patient.service;
 
 import com.medisphere.patient.dto.request.CreatePatientDTO;
+import com.medisphere.patient.dto.request.DeletePatientDTO;
 import com.medisphere.patient.dto.request.GetPatientByIdReqDTO;
 import com.medisphere.patient.dto.response.GetPatientByIdDTO;
 import com.medisphere.patient.dto.response.GetAllPatientsForAdminDTO;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
@@ -23,6 +26,7 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final ModelMapper modelMapper;
     private final CloudinaryService cloudinaryService;
+
 
     public List<GetAllPatientsForAdminDTO> getAllPatientsForAdmin(){
         try{
@@ -48,7 +52,7 @@ public class PatientService {
         }
     }
 
-    public String createPatient(CreatePatientDTO createPatientDTO, MultipartFile profileImage){
+    public String createPatient(@Validated CreatePatientDTO createPatientDTO, MultipartFile profileImage){
         try{
             String lastId = patientRepository.findLastPatientId();
             String newPatientId;
@@ -66,6 +70,16 @@ public class PatientService {
             }
 
             createPatientDTO.setPatientId(newPatientId);
+
+            if(createPatientDTO.getMsUserId() == null){
+                return "msUserId Can't be null";
+            }
+
+            PatientEntity checkPatientExists = patientRepository.checkPatientByMsUserId(createPatientDTO.getMsUserId());
+
+            if(checkPatientExists != null){
+                return "According to given msUserId patient already exists";
+            }
 
             if(createPatientDTO.getAllergies() == null || createPatientDTO.getAllergies().isEmpty()){
                 createPatientDTO.setAllergies("No Allergies Inserted yet");
@@ -112,6 +126,33 @@ public class PatientService {
             throw e;
         }catch(Exception e){
             throw new RuntimeException("Failed to create Patient: " + e.getMessage());
+        }
+    }
+
+
+    public String deletePatient(@Validated DeletePatientDTO deletePatientDTO){
+
+        if(deletePatientDTO.getPatientId() == null){
+            return "PatientId can't be null";
+        }
+
+        try{
+            PatientEntity patient = patientRepository.findByPatientId(deletePatientDTO.getPatientId());
+
+            if(patient == null){
+                return "According to given patient ID patient doesn't exists";
+            }
+
+            // Delete profile image from Cloudinary if it exists
+            if (patient.getProfileImageUrl() != null && !patient.getProfileImageUrl().isEmpty()) {
+                cloudinaryService.deleteImage(patient.getProfileImageUrl());
+            }
+
+            patientRepository.deletePatientByPatientId(deletePatientDTO.getPatientId());
+            return "Deleted";
+
+        }catch(Exception e){
+            throw new RuntimeException("Failed to delete Patient: " + e.getMessage());
         }
     }
 

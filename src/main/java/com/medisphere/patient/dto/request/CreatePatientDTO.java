@@ -28,19 +28,14 @@ public class CreatePatientDTO {
     @NotEmpty(message = "lastName can't be Empty")
     private String lastName;
 
-    @NotNull(message = "Date of Birth can't be Null")
     private LocalDate dateOfBirth;
 
-    @NotNull(message = "Gender can't be Null")
-    @NotEmpty(message = "Gender can't be Empty")
     private String gender;
 
     @NotNull(message = "Phone Number can't be Null")
     @NotEmpty(message = "Phone Number can't be Empty")
     private String phoneNumber;
 
-    @NotNull(message = "Address can't be Null")
-    @NotEmpty(message = "Address can't be Empty")
     private String address;
 
     private String bloodGroup;
