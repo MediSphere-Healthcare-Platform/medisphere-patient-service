@@ -34,9 +34,27 @@ public class CloudinaryService {
     }
 
     /**
-     * Deletes an image from Cloudinary using its URL.
+     * Uploads a medical report to Cloudinary under the "medisphere/reports" folder.
      *
-     * @param imageUrl the URL of the image to delete
+     * @param file the report file to upload
+     * @return the secure URL of the uploaded report
+     * @throws IOException if the upload fails
+     */
+    public String uploadReport(MultipartFile file) throws IOException {
+        Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap(
+                        "folder", "medisphere/reports",
+                        "resource_type", "image"
+                )
+        );
+        return (String) uploadResult.get("secure_url");
+    }
+
+    /**
+     * Deletes an image or file from Cloudinary using its URL.
+     *
+     * @param imageUrl the URL of the resource to delete
      */
     public void deleteImage(String imageUrl) {
         try {
@@ -45,11 +63,14 @@ public class CloudinaryService {
             }
             String publicId = extractPublicId(imageUrl);
             if (publicId != null) {
+                // Try to delete as image first (most common), then as raw if needed
+                // Or we can just use "resource_type" auto if available in destroy (it's not)
+                // However, for simplicity and since most reports are images/PDFs (both treated as image usually)
                 cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+                // We could add raw check here if needed, but let's stick to this for now.
             }
         } catch (Exception e) {
-            // Log the error but don't throw to prevent blocking the main process
-            System.err.println("Failed to delete image from Cloudinary: " + e.getMessage());
+            System.err.println("Failed to delete from Cloudinary: " + e.getMessage());
         }
     }
 

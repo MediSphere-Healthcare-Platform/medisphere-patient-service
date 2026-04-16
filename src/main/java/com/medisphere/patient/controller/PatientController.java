@@ -2,13 +2,10 @@ package com.medisphere.patient.controller;
 
 import com.medisphere.patient.client.AppointmentClient;
 import com.medisphere.patient.client.DoctorClient;
-import com.medisphere.patient.dto.request.AppointmentUpdateRequestDTO;
-import com.medisphere.patient.dto.request.BookAppointmentRequestDTO;
-import com.medisphere.patient.dto.request.CreatePatientDTO;
-import com.medisphere.patient.dto.request.DeletePatientDTO;
-import com.medisphere.patient.dto.request.GetPatientByIdReqDTO;
+import com.medisphere.patient.dto.request.*;
+import com.medisphere.patient.dto.response.GetAllMedicalReportsByPatientIdDTO;
 import com.medisphere.patient.dto.response.GetPatientByIdDTO;
-import com.medisphere.patient.repository.MedicalReportRepository;
+import com.medisphere.patient.dto.response.UploadMedicalReportResDTO;
 import com.medisphere.patient.service.MedicalReportService;
 import com.medisphere.patient.service.PatientService;
 import com.medisphere.patient.util.Endpoint;
@@ -82,7 +79,7 @@ public class PatientController {
         );
     }
 
-    @PutMapping(value = Endpoint.UPDATE_APPOINTMENT)
+    @PostMapping(value = Endpoint.UPDATE_APPOINTMENT)
     public ResponseEntity<Object> updateAppointment(@Valid @RequestBody AppointmentUpdateRequestDTO appointmentUpdateRequestDTO) {
         return new ResponseEntity<>(
                 appointmentClient.updateAppointment(appointmentUpdateRequestDTO),
@@ -114,6 +111,32 @@ public class PatientController {
         getPatientByIdReqDTO.setPatientId(pid);
         return new ResponseEntity<>(
                 new StandardResponse(200, "Patient Reports Successfully fetched..", medicalReportService.getAllMedicalReportByPatientId(getPatientByIdReqDTO)),
+                HttpStatus.OK
+        );
+    }
+
+    @PostMapping(value = Endpoint.UPLOAD_MEDICAL_REPORT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<StandardResponse> uploadMedicalReport(
+            @Valid @RequestPart("reportData") UploadMedicalReportReqDTO dto,
+            @RequestPart("file") MultipartFile file) {
+        return new ResponseEntity<>(
+                new StandardResponse(201, "Report Uploaded Successfully", medicalReportService.uploadMedicalReport(dto, file)),
+                HttpStatus.CREATED
+        );
+    }
+
+    @DeleteMapping(value = Endpoint.DELETE_MEDICAL_REPORT_BY_ID)
+    public ResponseEntity<StandardResponse> deleteMedicalReportById(@PathVariable("reportId") String reportId) {
+        return new ResponseEntity<>(
+                new StandardResponse(200, "Success", medicalReportService.deleteMedicalReportById(new DeleteMedicalReportByIdReqDTO(reportId))),
+                HttpStatus.OK
+        );
+    }
+
+    @DeleteMapping(value = Endpoint.DELETE_ALL_REPORTS_BY_PATIENT_ID)
+    public ResponseEntity<StandardResponse> deleteAllMedicalReportsByPatientId(@PathVariable("pid") String pid) {
+        return new ResponseEntity<>(
+                new StandardResponse(200, "Success", medicalReportService.deleteAllMedicalReportsByPatientId(new DeleteAllReportsByPatientIdReqDTO(pid))),
                 HttpStatus.OK
         );
     }
