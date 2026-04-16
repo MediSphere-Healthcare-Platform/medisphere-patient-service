@@ -140,4 +140,14 @@ public class PatientController {
                 HttpStatus.OK
         );
     }
+
+    @PutMapping(value = Endpoint.UPDATE_PATIENT_DETAILS)
+    public ResponseEntity<StandardResponse> updatePatientDetails(
+            @PathVariable("id") String id,
+            @Valid @RequestBody UpdatePatientDetailsReqDTO updatePatientDetailsReqDTO) {
+        return new ResponseEntity<>(
+                new StandardResponse(200, "Patient Details Updated Successfully", patientService.updatePatient(id, updatePatientDetailsReqDTO)),
+                HttpStatus.OK
+        );
+    }
 }

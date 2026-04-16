@@ -3,8 +3,10 @@ package com.medisphere.patient.service;
 import com.medisphere.patient.dto.request.CreatePatientDTO;
 import com.medisphere.patient.dto.request.DeletePatientDTO;
 import com.medisphere.patient.dto.request.GetPatientByIdReqDTO;
+import com.medisphere.patient.dto.request.UpdatePatientDetailsReqDTO;
 import com.medisphere.patient.dto.response.GetPatientByIdDTO;
 import com.medisphere.patient.dto.response.GetAllPatientsForAdminDTO;
+import com.medisphere.patient.dto.response.UpdatePatientDetailsResDTO;
 import com.medisphere.patient.entity.PatientEntity;
 import com.medisphere.patient.exception.EntryNotFoundException;
 import com.medisphere.patient.repository.PatientRepository;
@@ -81,15 +83,8 @@ public class PatientService {
                 return "According to given msUserId patient already exists";
             }
 
-            if(createPatientDTO.getAllergies() == null || createPatientDTO.getAllergies().isEmpty()){
-                createPatientDTO.setAllergies("No Allergies Inserted yet");
-            }
-            if(createPatientDTO.getBloodGroup() == null || createPatientDTO.getBloodGroup().isEmpty()){
-                createPatientDTO.setBloodGroup("No Blood Group Inserted yet");
-            }
-            if(createPatientDTO.getChronicConditions() == null || createPatientDTO.getChronicConditions().isEmpty()){
-                createPatientDTO.setChronicConditions("No Chronic Conditions Inserted yet");
-            }
+            // Standardize empty/null fields
+            setDefaultsForEmptyFields(createPatientDTO);
 
             // Handle optional profile image upload
             if(profileImage != null && !profileImage.isEmpty()){
@@ -156,5 +151,46 @@ public class PatientService {
         }
     }
 
+    public UpdatePatientDetailsResDTO updatePatient(String patientId, UpdatePatientDetailsReqDTO dto) {
+        try {
+            PatientEntity patient = patientRepository.findByPatientId(patientId);
+            if (patient == null) {
+                throw new EntryNotFoundException("Patient not found with ID: " + patientId);
+            }
+
+            // Update allowed fields
+            patient.setDateOfBirth(dto.getDateOfBirth());
+            patient.setGender(dto.getGender());
+            patient.setPhoneNumber(dto.getPhoneNumber());
+            patient.setAddress(dto.getAddress());
+            
+            // Handle optional fields with defaults
+            patient.setBloodGroup((dto.getBloodGroup() == null || dto.getBloodGroup().isEmpty()) ? "No Blood Group Inserted yet" : dto.getBloodGroup());
+            patient.setAllergies((dto.getAllergies() == null || dto.getAllergies().isEmpty()) ? "No Allergies Inserted yet" : dto.getAllergies());
+            patient.setChronicConditions((dto.getChronicConditions() == null || dto.getChronicConditions().isEmpty()) ? "No Chronic Conditions Inserted yet" : dto.getChronicConditions());
+            
+            patient.setUpdatedAt(Instant.now());
+
+            PatientEntity updatedPatient = patientRepository.save(patient);
+            return modelMapper.map(updatedPatient, UpdatePatientDetailsResDTO.class);
+
+        } catch (EntryNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update Patient: " + e.getMessage());
+        }
+    }
+
+    private void setDefaultsForEmptyFields(CreatePatientDTO dto) {
+        if (dto.getAllergies() == null || dto.getAllergies().isEmpty()) {
+            dto.setAllergies("No Allergies Inserted yet");
+        }
+        if (dto.getBloodGroup() == null || dto.getBloodGroup().isEmpty()) {
+            dto.setBloodGroup("No Blood Group Inserted yet");
+        }
+        if (dto.getChronicConditions() == null || dto.getChronicConditions().isEmpty()) {
+            dto.setChronicConditions("No Chronic Conditions Inserted yet");
+        }
+    }
 
 }
