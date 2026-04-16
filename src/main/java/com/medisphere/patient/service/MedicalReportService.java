@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -84,6 +85,7 @@ public class MedicalReportService {
             MedisphereMedicalReportEntity reportEntity = new MedisphereMedicalReportEntity();
             reportEntity.setReportId(newReportId);
             reportEntity.setPatient(dto.getPatientId());
+            reportEntity.setDoctorId(dto.getDoctorId());
             reportEntity.setReportName(dto.getReportName());
             reportEntity.setReportType(dto.getReportType());
             reportEntity.setFileUrl(fileUrl);
@@ -144,6 +146,23 @@ public class MedicalReportService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to delete all reports: " + e.getMessage());
+        }
+    }
+
+    public List<GetAllMedicalReportsByPatientIdDTO> getAllMedicalReportByDoctorId(String doctorId) {
+        try {
+            List<MedisphereMedicalReportEntity> doctorReports = medicalReportRepository.findAllByDoctorId(doctorId);
+            
+            if (doctorReports == null || doctorReports.isEmpty()) {
+                throw new EntryNotFoundException("there have no reports uploaded for given doctor id");
+            }
+            
+            return modelMapper.map(doctorReports, new TypeToken<List<GetAllMedicalReportsByPatientIdDTO>>() {}.getType());
+        } catch (EntryNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to fetch reports for doctor: " + e.getMessage());
         }
     }
 }

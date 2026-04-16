@@ -53,4 +53,7 @@ public class MedisphereMedicalReportEntity {
     @Column(name = "uploaded_at")
     private Instant uploadedAt;
 
+    @Size(max = 50)
+    @Column(name = "doctor_id", length = 50)
+    private String doctorId;
 }

@@ -16,4 +16,7 @@ public interface AppointmentClient {
 
     @DeleteMapping(value = "appointments/cancel/{appointmentReferenceId}")
     Object cancelAppointment(@PathVariable("appointmentReferenceId") String appointmentReferenceId);
+
+    @GetMapping(value = "appointments/allAppointmentsByPatientId/{patientId}")
+    Object getAllAppointmentsByPatientId(@PathVariable("patientId") String patientId);
 }

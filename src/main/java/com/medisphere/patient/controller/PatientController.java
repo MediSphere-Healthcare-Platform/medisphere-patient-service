@@ -150,4 +150,20 @@ public class PatientController {
                 HttpStatus.OK
         );
     }
+
+    @GetMapping(value = Endpoint.GET_ALL_APPOINTMENTS_BY_PATIENT_ID)
+    public ResponseEntity<Object> getAllAppointmentsByPatientId(@PathVariable("patientId") String patientId) {
+        return new ResponseEntity<>(
+                appointmentClient.getAllAppointmentsByPatientId(patientId),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping(value = Endpoint.GET_MEDICAL_REPORTS_BY_DOCTOR_ID)
+    public ResponseEntity<StandardResponse> getMedicalReportsByDoctorId(@PathVariable("doctorId") String doctorId) {
+        return new ResponseEntity<>(
+                new StandardResponse(200, "Success", medicalReportService.getAllMedicalReportByDoctorId(doctorId)),
+                HttpStatus.OK
+        );
+    }
 }

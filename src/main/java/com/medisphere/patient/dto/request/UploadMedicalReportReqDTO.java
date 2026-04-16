@@ -21,5 +21,8 @@ public class UploadMedicalReportReqDTO {
     @NotBlank(message = "Report Type is required")
     private String reportType;
 
+    @NotBlank(message = "Doctor ID is required")
+    private String doctorId;
+
     private String description;
 }

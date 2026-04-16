@@ -14,4 +14,6 @@ public class Endpoint {
     public static final String UPLOAD_MEDICAL_REPORT = "/uploadMedicalReport";
     public static final String DELETE_MEDICAL_REPORT_BY_ID = "/deleteMedicalReport/{reportId}";
     public static final String DELETE_ALL_REPORTS_BY_PATIENT_ID = "/deleteAllMedicalReportsByPatientId/{pid}";
+    public static final String GET_ALL_APPOINTMENTS_BY_PATIENT_ID = "appointments/allAppointmentsByPatientId/{patientId}";
+    public static final String GET_MEDICAL_REPORTS_BY_DOCTOR_ID = "/getMedicalReportsByDoctorId/{doctorId}";
 }

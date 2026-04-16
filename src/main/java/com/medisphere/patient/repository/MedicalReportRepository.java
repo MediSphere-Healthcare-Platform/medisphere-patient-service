@@ -15,6 +15,9 @@ public interface MedicalReportRepository extends JpaRepository<MedisphereMedical
     @Query(value = "SELECT * FROM medisphere_medical_report WHERE patient_id = :patientId", nativeQuery = true)
     List<MedisphereMedicalReportEntity> findAllByPatient(@Param("patientId") String patientId);
 
+    @Query(value = "SELECT * FROM medisphere_medical_report WHERE doctor_id = :doctorId", nativeQuery = true)
+    List<MedisphereMedicalReportEntity> findAllByDoctorId(@Param("doctorId") String doctorId);
+
     @Query(value = "SELECT report_id FROM medisphere_medical_report ORDER BY id DESC LIMIT 1", nativeQuery = true)
     String findLastReportId();
 
