@@ -2,6 +2,7 @@ package com.medisphere.patient.controller;
 
 import com.medisphere.patient.client.AppointmentClient;
 import com.medisphere.patient.client.DoctorClient;
+import com.medisphere.patient.client.TelemedicineClient;
 import com.medisphere.patient.dto.request.*;
 import com.medisphere.patient.dto.response.GetAllMedicalReportsByPatientIdDTO;
 import com.medisphere.patient.dto.response.GetPatientByIdDTO;
@@ -29,6 +30,7 @@ public class PatientController {
     private final DoctorClient doctorClient;
     private final AppointmentClient appointmentClient;
     private final MedicalReportService medicalReportService;
+    private final TelemedicineClient telemedicineClient;
 
     @GetMapping(value = Endpoint.GET_ALL_DOCTORS_FOR_PATIENT)
     public ResponseEntity<StandardResponse> getAllDoctorsForPatient() {
@@ -176,6 +178,38 @@ public class PatientController {
         return new ResponseEntity<>(
                 new StandardResponse(201, "Patient created successfully", patientId),
                 HttpStatus.CREATED
+        );
+    }
+
+    @GetMapping(value = Endpoint.GET_PATIENT_SESSIONS)
+    public ResponseEntity<Object> getPatientSessions(@PathVariable("patientId") String patientId) {
+        return new ResponseEntity<>(
+                telemedicineClient.getSessionsByPatientId(patientId),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping(value = Endpoint.GET_TELEMEDICINE_SESSION_BY_ID)
+    public ResponseEntity<Object> getTelemedicineSessionById(@PathVariable("sessionId") String sessionId, @RequestParam String userId) {
+        return new ResponseEntity<>(
+                telemedicineClient.getSessionById(sessionId, userId, "PATIENT"),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping(value = Endpoint.GET_PATIENT_PRESCRIPTIONS)
+    public ResponseEntity<Object> getPatientPrescriptions(@PathVariable("patientId") String patientId) {
+        return new ResponseEntity<>(
+                telemedicineClient.getPrescriptionsByPatientId(patientId),
+                HttpStatus.OK
+        );
+    }
+
+    @DeleteMapping(value = Endpoint.DELETE_PRESCRIPTION)
+    public ResponseEntity<Object> deletePrescription(@PathVariable("prescriptionId") String prescriptionId, @RequestParam String doctorUserId) {
+        return new ResponseEntity<>(
+                telemedicineClient.deletePrescription(prescriptionId, doctorUserId),
+                HttpStatus.OK
         );
     }
 }

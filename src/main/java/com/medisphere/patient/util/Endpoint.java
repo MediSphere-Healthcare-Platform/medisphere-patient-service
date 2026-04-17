@@ -16,4 +16,8 @@ public class Endpoint {
     public static final String DELETE_ALL_REPORTS_BY_PATIENT_ID = "/deleteAllMedicalReportsByPatientId/{pid}";
     public static final String GET_ALL_APPOINTMENTS_BY_PATIENT_ID = "appointments/allAppointmentsByPatientId/{patientId}";
     public static final String GET_MEDICAL_REPORTS_BY_DOCTOR_ID = "/getMedicalReportsByDoctorId/{doctorId}";
+    public static final String GET_PATIENT_SESSIONS = "/telemedicine/sessions/{patientId}";
+    public static final String GET_TELEMEDICINE_SESSION_BY_ID = "/telemedicine/sessions/join/{sessionId}";
+    public static final String GET_PATIENT_PRESCRIPTIONS = "/telemedicine/prescriptions/{patientId}";
+    public static final String DELETE_PRESCRIPTION = "/telemedicine/prescriptions/{prescriptionId}";
 }
