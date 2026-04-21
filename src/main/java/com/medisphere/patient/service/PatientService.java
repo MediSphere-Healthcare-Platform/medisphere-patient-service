@@ -1,5 +1,6 @@
 package com.medisphere.patient.service;
 
+import com.medisphere.patient.client.AuthClient;
 import com.medisphere.patient.dto.request.CreatePatientDTO;
 import com.medisphere.patient.dto.request.DeletePatientDTO;
 import com.medisphere.patient.dto.request.GetPatientByIdReqDTO;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,12 +25,18 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PatientService {
 
     private final PatientRepository patientRepository;
     private final ModelMapper modelMapper;
     private final CloudinaryService cloudinaryService;
+    private final AuthClient authClient;
 
+
+    public Long getMaxMsUserId() {
+        return patientRepository.findMaxMsUserId();
+    }
 
     public List<GetAllPatientsForAdminDTO> getAllPatientsForAdmin(){
         try{
@@ -74,13 +82,13 @@ public class PatientService {
             createPatientDTO.setPatientId(newPatientId);
 
             if(createPatientDTO.getMsUserId() == null){
-                return "msUserId Can't be null";
+                throw new RuntimeException("msUserId Can't be null");
             }
 
             PatientEntity checkPatientExists = patientRepository.checkPatientByMsUserId(createPatientDTO.getMsUserId());
 
             if(checkPatientExists != null){
-                return "According to given msUserId patient already exists";
+                throw new RuntimeException("According to given msUserId patient already exists");
             }
 
             // Standardize empty/null fields
@@ -128,14 +136,14 @@ public class PatientService {
     public String deletePatient(@Validated DeletePatientDTO deletePatientDTO){
 
         if(deletePatientDTO.getPatientId() == null){
-            return "PatientId can't be null";
+            throw new RuntimeException("PatientId can't be null");
         }
 
         try{
             PatientEntity patient = patientRepository.findByPatientId(deletePatientDTO.getPatientId());
 
             if(patient == null){
-                return "According to given patient ID patient doesn't exists";
+                throw new EntryNotFoundException("According to given patient ID patient doesn't exists");
             }
 
             // Delete profile image from Cloudinary if it exists
@@ -144,10 +152,44 @@ public class PatientService {
             }
 
             patientRepository.deletePatientByPatientId(deletePatientDTO.getPatientId());
+            
+            // Sync deletion with Auth Service
+            try {
+                authClient.deleteUserByMsUserId(patient.getMsUserId());
+            } catch (Exception e) {
+                System.err.println("Failed to sync deletion with Auth Service: " + e.getMessage());
+            }
+            
             return "Deleted";
 
         }catch(Exception e){
             throw new RuntimeException("Failed to delete Patient: " + e.getMessage());
+        }
+    }
+
+    public String deletePatientByMsUserId(String msUserId) {
+        try {
+            PatientEntity patient = patientRepository.checkPatientByMsUserId(msUserId);
+            if (patient == null) {
+                return "Patient not found for MS User ID: " + msUserId;
+            }
+            
+            if (patient.getProfileImageUrl() != null && !patient.getProfileImageUrl().isEmpty()) {
+                cloudinaryService.deleteImage(patient.getProfileImageUrl());
+            }
+            
+            patientRepository.deletePatientByPatientId(patient.getPatientId());
+
+            // Sync deletion with Auth Service
+            try {
+                authClient.deleteUserByMsUserId(msUserId);
+            } catch (Exception e) {
+                System.err.println("Failed to sync deletion with Auth Service: " + e.getMessage());
+            }
+
+            return "Deleted";
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete Patient by MS User ID: " + e.getMessage());
         }
     }
 

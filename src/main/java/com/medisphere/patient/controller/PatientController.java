@@ -212,4 +212,15 @@ public class PatientController {
                 HttpStatus.OK
         );
     }
+    @DeleteMapping(value = "/deletePatient/internal/{msUserId}")
+    public ResponseEntity<StandardResponse> deletePatientInternal(@PathVariable("msUserId") String msUserId) {
+        return new ResponseEntity<>(
+                new StandardResponse(200, "Patient deleted successfully", patientService.deletePatientByMsUserId(msUserId)),
+                HttpStatus.OK
+        );
+    }
+    @GetMapping(value = "/getMaxMsUserId/internal")
+    public Long getMaxMsUserId() {
+        return patientService.getMaxMsUserId();
+    }
 }
