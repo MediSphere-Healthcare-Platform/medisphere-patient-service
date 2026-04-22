@@ -58,9 +58,9 @@ public class MedicalReportService {
                 throw new EntryNotFoundException("According to given patient ID patient doesn't exists");
             }
 
-            // Check if accurately file is a PDF
-            if (file.getContentType() == null || !file.getContentType().equals("application/pdf")) {
-                throw new FileFormatNotSupportedException("Only PDF files are allowed for medical reports");
+            // Check if accurately file is an image
+            if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
+                throw new FileFormatNotSupportedException("Only image files (JPG, PNG, etc.) are allowed for medical reports");
             }
 
             // Generate report ID (Format: R001, R002...)
@@ -157,7 +157,19 @@ public class MedicalReportService {
                 throw new EntryNotFoundException("there have no reports uploaded for given doctor id");
             }
             
-            return modelMapper.map(doctorReports, new TypeToken<List<GetAllMedicalReportsByPatientIdDTO>>() {}.getType());
+            List<GetAllMedicalReportsByPatientIdDTO> dtoList = modelMapper.map(doctorReports, new TypeToken<List<GetAllMedicalReportsByPatientIdDTO>>() {}.getType());
+            
+            // Enrich with patient names
+            for (GetAllMedicalReportsByPatientIdDTO dto : dtoList) {
+                PatientEntity patient = patientRepository.findByPatientId(dto.getPatient());
+                if (patient != null) {
+                    dto.setPatientName(patient.getFirstName() + " " + patient.getLastName());
+                } else {
+                    dto.setPatientName("Unknown Patient (" + dto.getPatient() + ")");
+                }
+            }
+            
+            return dtoList;
         } catch (EntryNotFoundException e) {
             throw e;
         } catch (Exception e) {

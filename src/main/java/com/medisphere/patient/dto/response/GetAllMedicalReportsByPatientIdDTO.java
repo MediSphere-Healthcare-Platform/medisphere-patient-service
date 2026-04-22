@@ -24,6 +24,7 @@ public class GetAllMedicalReportsByPatientIdDTO {
     private String fileUrl;
     private String fileType;
     private String description;
+    private String patientName;
     private Instant uploadedAt;
 
 }

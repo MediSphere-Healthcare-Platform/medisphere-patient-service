@@ -143,12 +143,13 @@ public class PatientController {
         );
     }
 
-    @PutMapping(value = Endpoint.UPDATE_PATIENT_DETAILS)
+    @PutMapping(value = Endpoint.UPDATE_PATIENT_DETAILS, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StandardResponse> updatePatientDetails(
             @PathVariable("id") String id,
-            @Valid @RequestBody UpdatePatientDetailsReqDTO updatePatientDetailsReqDTO) {
+            @Valid @RequestPart("patient") UpdatePatientDetailsReqDTO updatePatientDetailsReqDTO,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         return new ResponseEntity<>(
-                new StandardResponse(200, "Patient Details Updated Successfully", patientService.updatePatient(id, updatePatientDetailsReqDTO)),
+                new StandardResponse(200, "Patient Details Updated Successfully", patientService.updatePatient(id, updatePatientDetailsReqDTO, profileImage)),
                 HttpStatus.OK
         );
     }
@@ -211,5 +212,16 @@ public class PatientController {
                 telemedicineClient.deletePrescription(prescriptionId, doctorUserId),
                 HttpStatus.OK
         );
+    }
+    @DeleteMapping(value = "/deletePatient/internal/{msUserId}")
+    public ResponseEntity<StandardResponse> deletePatientInternal(@PathVariable("msUserId") String msUserId) {
+        return new ResponseEntity<>(
+                new StandardResponse(200, "Patient deleted successfully", patientService.deletePatientByMsUserId(msUserId)),
+                HttpStatus.OK
+        );
+    }
+    @GetMapping(value = "/getMaxMsUserId/internal")
+    public Long getMaxMsUserId() {
+        return patientService.getMaxMsUserId();
     }
 }
