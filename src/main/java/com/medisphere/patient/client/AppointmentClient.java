@@ -8,15 +8,15 @@ import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "medisphere-appointment-service", path = "/api/v1")
 public interface AppointmentClient {
-    @PostMapping(value = "appointments/bookAppointment")
+    @PostMapping(value = "/appointments/bookAppointment")
     Object bookAppointment(@RequestBody BookAppointmentRequestDTO bookAppointmentRequestDTO);
 
-    @PutMapping(value = "appointments/updateAppointment")
+    @PutMapping(value = "/appointments/updateAppointment")
     Object updateAppointment(@RequestBody AppointmentUpdateRequestDTO appointmentUpdateRequestDTO);
 
-    @DeleteMapping(value = "appointments/cancel/{appointmentReferenceId}")
+    @DeleteMapping(value = "/appointments/cancel/{appointmentReferenceId}")
     Object cancelAppointment(@PathVariable("appointmentReferenceId") String appointmentReferenceId);
 
-    @GetMapping(value = "appointments/allAppointmentsByPatientId/{patientId}")
+    @GetMapping(value = "/appointments/allAppointmentsByPatientId/{patientId}")
     Object getAllAppointmentsByPatientId(@PathVariable("patientId") String patientId);
 }

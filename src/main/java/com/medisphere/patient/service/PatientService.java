@@ -193,11 +193,22 @@ public class PatientService {
         }
     }
 
-    public UpdatePatientDetailsResDTO updatePatient(String patientId, UpdatePatientDetailsReqDTO dto) {
+    public UpdatePatientDetailsResDTO updatePatient(String patientId, UpdatePatientDetailsReqDTO dto, MultipartFile profileImage) {
         try {
             PatientEntity patient = patientRepository.findByPatientId(patientId);
             if (patient == null) {
                 throw new EntryNotFoundException("Patient not found with ID: " + patientId);
+            }
+
+            // Handle profile image update
+            if (profileImage != null && !profileImage.isEmpty()) {
+                // Delete old image if it exists
+                if (patient.getProfileImageUrl() != null && !patient.getProfileImageUrl().isEmpty()) {
+                    cloudinaryService.deleteImage(patient.getProfileImageUrl());
+                }
+                // Upload new image
+                String newImageUrl = cloudinaryService.uploadProfileImage(profileImage);
+                patient.setProfileImageUrl(newImageUrl);
             }
 
             // Update allowed fields
